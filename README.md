@@ -1,2 +1,8 @@
 # arttime
-tool for art challenges check
+  This is a tool for artists to have a simple and fast art challenges check.
+## Plan (What to expect from this project)
+- [] Android app
+- [] Scrollable calendar of uploaded challenges
+- [] Detailed descriptions of challenges
+- [] Page for adding and changing challenges
+
