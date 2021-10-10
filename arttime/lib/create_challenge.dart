@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:arttime/model.dart' as model;
+import 'package:arttime/api.dart' as api;
+import 'package:http/http.dart' as http;
 
 class CreateChallenge extends StatefulWidget {
   const CreateChallenge({Key? key}) : super(key: key);
@@ -24,6 +28,15 @@ class _CreateChallengeState extends State<CreateChallenge> {
   DateTime? start;
   DateTime? end;
 
+  Future<bool> submitChallenge() async {
+    final challenge = model.Challenge(
+        title, description, imageUrl, author, category,
+        start: start, end: end);
+    final response = await http.post(Uri.parse("${api.address}/challenge/add"),
+        body: jsonEncode(challenge.toJson()));
+    return response.statusCode == 200;
+  }
+
   @override
   Widget build(BuildContext context) {
     const requiredField = "This is a required field.";
@@ -31,11 +44,17 @@ class _CreateChallengeState extends State<CreateChallenge> {
         appBar: AppBar(
           actions: [
             IconButton(
-                onPressed: () {
+                onPressed: () async {
                   _formKey.currentState!.save();
                   if (_formKey.currentState!.validate()) {
                     if (start == null || end == null || start!.isBefore(end!)) {
-                      Navigator.pop(context, title);
+                      if (await submitChallenge()) {
+                        Navigator.pop(context, title);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text("Failed to submit challenge.")));
+                      }
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                           content:

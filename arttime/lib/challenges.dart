@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:arttime/create_challenge.dart';
 import 'package:arttime/model.dart';
 import 'package:arttime/view_challenge.dart';
 import 'package:flutter/material.dart';
 import 'package:arttime/date_ext.dart';
+import 'package:arttime/api.dart' as api;
+import 'package:http/http.dart' as http;
 
 class Challenges extends StatefulWidget {
   const Challenges({Key? key}) : super(key: key);
@@ -13,24 +17,37 @@ class Challenges extends StatefulWidget {
 
 class _ChallengesState extends State<Challenges> {
   var week = Week.current();
+  List<Challenge> challenges = [];
+
+  void updateChallenges() {
+    http.get(Uri.parse("${api.address}/challenge/all")).then((response) async {
+      final List<dynamic> list = jsonDecode(response.body)["challenges"];
+      setState(() {
+        challenges = list
+            .map((challenge) =>
+                Challenge.fromJson(challenge as Map<String, dynamic>))
+            .toList();
+      });
+    });
+  }
+
+  @override
+  void initState() {
+    updateChallenges();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    const inktoberImageUrl =
-        "https://images.squarespace-cdn.com/content/v1/5af1bd791aef1d143f85e67e/1598971813646-LIDJT29ZD10HOAG4DJT9/2020promptlist.jpg?format=1000w";
-    final List<Challenge> challenges = [
-      Challenge(
-          "Title1", "Description", inktoberImageUrl, "author", Category.single,
-          start: DateTime(2021, 10, 6), end: DateTime(2021, 10, 9)),
-      Challenge("Title2", "Description", "https://i.imgur.com/4hoLJS0.png",
-          "author", Category.single,
-          start: DateTime(2021, 10, 2), end: DateTime(2021, 10, 7)),
-      Challenge(
-          "Title3", "Description", inktoberImageUrl, "author", Category.single,
-          start: DateTime(2021, 10, 10)),
-    ];
     return Scaffold(
-        appBar: AppBar(title: const Text("Challenges")),
+        appBar: AppBar(
+          title: const Text("Challenges"),
+          actions: [
+            IconButton(
+                onPressed: () => updateChallenges(),
+                icon: const Icon(Icons.update))
+          ],
+        ),
         body: Column(
           children: [
             WeekDates((w) => setState(() => week = w),
@@ -57,6 +74,7 @@ class _ChallengesState extends State<Challenges> {
               if (title != null) {
                 ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text("Challenge created: $title")));
+                updateChallenges();
               }
             },
             icon: const Icon(Icons.add),

@@ -70,8 +70,8 @@ class Challenge {
   Challenge.fromJson(Map<String, dynamic> json)
       : title = json['title'] as String,
         description = json['description'] as String,
-        imageUrl = json["imageUrl"] as String,
-        authorContact = json["authorContact"] as String,
+        imageUrl = json["image_url"] as String,
+        authorContact = json["author_contact"] as String,
         category = parseCategory(json["category"] as String),
         start = json["start"] == null
             ? null
@@ -82,8 +82,8 @@ class Challenge {
   Map<String, dynamic> toJson() => {
         'title': title,
         'description': description,
-        "imageUrl": imageUrl,
-        "authorContact": authorContact,
+        "image_url": imageUrl,
+        "author_contact": authorContact,
         "category": category.format(),
         "start": start?.toIso8601String(),
         "end": end?.toIso8601String()
